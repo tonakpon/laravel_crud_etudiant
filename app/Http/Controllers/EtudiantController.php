@@ -26,8 +26,9 @@ class EtudiantController extends Controller
     }
     public function create()
     {
+        $Data = date('Y-m-d');
         $classes = Classe::all(); 
-        return view('etudiants.create', compact('classes'));
+        return view('etudiants.create', compact('classes', 'Data'));
     }
     public function store(Request $request)
     {
@@ -64,14 +65,19 @@ class EtudiantController extends Controller
         $request->validate([
             'name' => 'required',
             'fname' => 'required',
-            'tel' => 'required|unique:etudiants|max:20',
+            'tel' => 'required|unique:etudiants,tel,' . $etudiant->id . '|max:20',
             'date' => 'required',
             'classe_id' => 'required',
         ],[
-            'tel.unique' => 'Cette donnée existe déjà.', 
+            'tel.unique' => 'Ce numéro existe déjà.', 
         ]);
         
-        $etudiant->fill($request->post())->save();
+        $etudiant->setAttribute('name', $request->name);
+        $etudiant->setAttribute('fname', $request->fname);
+        $etudiant->setAttribute('tel', $request->tel);
+        $etudiant->setAttribute('date', $request->date);
+        $etudiant->setAttribute('classe_id', $request->classe_id);
+        $etudiant->update();
 
         return redirect()->route('etudiants.index')->with('success','donnée modifiée');
     }
